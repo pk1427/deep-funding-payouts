@@ -1,0 +1,1 @@
+{"scripts":{"reproduce":"tsx src/allocate.ts","test":"tsx test/reproduce.ts"},"devDependencies":{"tsx":"latest","@openzeppelin/merkle-tree":"latest","viem":"latest"}}
