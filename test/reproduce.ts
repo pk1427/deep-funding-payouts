@@ -1,0 +1,1 @@
+import{execFileSync}from'node:child_process';import{readFileSync}from'node:fs';execFileSync('npm',['run','reproduce'],{stdio:'inherit'});let a=JSON.parse(readFileSync('out/result.json','utf8')),e=JSON.parse(readFileSync('data/expected-output.json','utf8'));if(a.root!==e.root||a.pot!==e.pot)throw Error('reproduction mismatch');console.log('reproduction matches expected output');

@@ -126,8 +126,9 @@ contract DeepFundingPayout {
         emit Finalized(root, total);
     }
 
-    function leaf(address recipient, uint256 amount) public view returns (bytes32) {
-        return keccak256(bytes.concat(keccak256(abi.encode(block.chainid, address(this), recipient, amount))));
+    /// @dev Matches OpenZeppelin StandardMerkleTree leaves: address + uint256.
+    function leaf(address recipient, uint256 amount) public pure returns (bytes32) {
+        return keccak256(bytes.concat(keccak256(abi.encode(recipient, amount))));
     }
 
     function claim(address recipient, uint256 amount, bytes32[] calldata proof) external nonReentrant {
