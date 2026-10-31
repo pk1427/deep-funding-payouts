@@ -1,3 +1,7 @@
-export type Judgment={parent:string;more:string;less:string;ratio:string;signature:string};
-export const SCALE=10_000n;
-export function dependencyWeights(deps:string[],judgments:Judgment[]){if(!deps.length)return{} as Record<string,bigint>;let s=Object.fromEntries(deps.map(x=>[x,SCALE]))as Record<string,bigint>;for(const j of judgments)if(s[j.more]!==undefined&&s[j.less]!==undefined){let r=BigInt(j.ratio);s[j.more]+=r;s[j.less]+=SCALE/r;}let sum=Object.values(s).reduce((a,b)=>a+b,0n);return Object.fromEntries(deps.map(d=>[d,s[d]*SCALE/sum]));}
+import{recoverTypedDataAddress}from'viem';
+export type Judgment={parent:string;more:string;less:string;ratio:string;signature:string};export const SCALE=10_000n;
+const domain={name:'DeepFundingJudgment',version:'1',chainId:11155111n};const types={Judgment:[{name:'parent',type:'string'},{name:'more',type:'string'},{name:'less',type:'string'},{name:'ratio',type:'uint256'}]};
+/** Recover EIP-712 judges; malformed or non-juror signatures are logged and excluded. */
+export async function verifiedJudgments(raw:Judgment[],jurors:string[]){let allowed=new Set(jurors.map(x=>x.toLowerCase())),valid:Judgment[]=[];for(const j of raw){try{let signer=await recoverTypedDataAddress({domain,types,primaryType:'Judgment',message:{parent:j.parent,more:j.more,less:j.less,ratio:BigInt(j.ratio)},signature:j.signature as `0x${string}`});if(!allowed.has(signer.toLowerCase())){console.warn(`Rejected judgment from non-juror ${signer}`);continue}valid.push(j)}catch{console.warn(`Rejected invalid judgment for ${j.parent}`)}}return valid}
+/** Deterministic integer log-ratio approximation. Empty judgment sets use equal weights. */
+export function dependencyWeights(deps:string[],judgments:Judgment[]){if(!deps.length)return{} as Record<string,bigint>;let s=Object.fromEntries(deps.map(x=>[x,SCALE]))as Record<string,bigint>;for(const j of judgments)if(s[j.more]!==undefined&&s[j.less]!==undefined){let r=BigInt(j.ratio);if(r==0n)continue;s[j.more]+=r;s[j.less]+=SCALE/r;}let sum=Object.values(s).reduce((a,b)=>a+b,0n);return Object.fromEntries(deps.map(d=>[d,s[d]*SCALE/sum]));}
