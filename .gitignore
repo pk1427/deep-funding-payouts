@@ -3,3 +3,6 @@ out/
 cache/
 node_modules/
 broadcast/
+/web/node_modules/
+/web/dist/
+/web/package-lock.json
